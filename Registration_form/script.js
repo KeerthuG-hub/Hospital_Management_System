@@ -100,3 +100,5 @@ document.getElementById("patientForm").addEventListener("reset", function () {
     document.getElementById("patientForm").style.display = "block";
   }, 0);
 });
+
+//test
