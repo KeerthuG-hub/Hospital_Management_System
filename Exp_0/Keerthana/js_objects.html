@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Portal Example</title>
+  <style>
+    body {
+      font-family: Arial;
+    }
+    button {
+      padding: 8px 14px;
+      margin-top: 10px;
+    }
+    pre {
+      background: #f2f2f2;
+      padding: 10px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Simple Student System</h2>
+<button onclick="startApp()">Start</button>
+
+<pre id="output"></pre>
+
+<script>
+  const output = document.getElementById("output");
+
+  function write(text) {
+    output.textContent += text + "\n";
+  }
+
+  /* object literal */
+  const student = {
+    name: "Keerthu",
+    department: "Computer Science",
+    active: true,
+    introduce() {
+      return "Hello, I am " + this.name;
+    }
+  };
+
+  /* constructor function */
+  function Subject(title, credits) {
+    this.title = title;
+    this.credits = credits;
+  }
+
+  /* Object.create for prototype sharing */
+  const personMethods = {
+    greet() {
+      return "Welcome " + this.name;
+    }
+  };
+
+  const assistant = Object.create(personMethods);
+  assistant.name = "Rahul";
+
+  /* Map object */
+  const marks = new Map();
+  marks.set("Math", 90);
+  marks.set("Programming", 95);
+
+  /* Array of objects */
+  const activities = [
+    { name: "Hackathon", status: "Completed" },
+    { name: "Workshop", status: "Ongoing" }
+  ];
+
+  /* async function returning object */
+  async function fetchServerData() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          server: "Online",
+          time: new Date().toLocaleTimeString()
+        });
+      }, 1000);
+    });
+  }
+
+  async function startApp() {
+    output.textContent = "";
+
+    write(student.introduce());
+
+    /* dynamic property */
+    student.year = "Second Year";
+    write("Year: " + student.year);
+
+    /* constructor usage */
+    const sub1 = new Subject("JavaScript", 4);
+    write("Subject: " + sub1.title + " Credits: " + sub1.credits);
+
+    /* Object.create usage */
+    write(assistant.greet());
+
+    /* Map iteration */
+    write("Marks:");
+    marks.forEach((value, key) => {
+      write(key + ": " + value);
+    });
+
+    /* destructuring */
+    const { name, department } = student;
+    write("Student Name: " + name);
+    write("Department: " + department);
+
+    /* spread operator */
+    const updatedStudent = { ...student, active: false };
+    write("Active Status Changed: " + updatedStudent.active);
+
+    /* array of objects loop */
+    write("Activities:");
+    activities.forEach(activity => {
+      write(activity.name + " - " + activity.status);
+    });
+
+    /* async / await */
+    const serverData = await fetchServerData();
+    write("Server Status: " + serverData.server);
+    write("Checked At: " + serverData.time);
+
+    /* JSON conversion */
+    const jsonData = JSON.stringify(student);
+    write("Student JSON: " + jsonData);
+  }
+</script>
+
+</body>
+</html>
