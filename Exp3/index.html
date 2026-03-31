@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hospital Admin Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="jquery.js"></script>
+    <script src="ajax.js"></script>
+</head>
+
+<body>
+
+    <h2>Hospital Management System - Admin</h2>
+
+    <div class="box">
+        <h3>Add Patient</h3>
+        Name: <input type="text" id="name">
+        Age: <input type="number" id="age">
+        Disease: <input type="text" id="disease">
+        <button id="addBtn">Add</button>
+    </div>
+
+    <hr>
+
+    <button id="loadBtn">Load Patients (AJAX)</button>
+    <button id="noticeBtn">Load Notice (.load)</button>
+    <button id="hideBtn">Hide Table</button>
+    <button id="showBtn">Show Table</button>
+
+    <br><br>
+
+    Search: <input type="text" id="search">
+
+    <div id="noticeArea"></div>
+
+    <br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Disease</th>
+            </tr>
+        </thead>
+        <tbody id="patientTable"></tbody>
+    </table>
+
+</body>
+
+</html>

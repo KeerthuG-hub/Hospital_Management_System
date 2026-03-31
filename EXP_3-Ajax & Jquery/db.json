@@ -1,0 +1,23 @@
+{
+  "doctors": [
+    {
+      "id": "a4e2",
+      "name": "Dr. Alice",
+      "specialization": "Cardiology"
+    },
+    {
+      "id": "3697",
+      "name": "Dr. Anitha",
+      "specialization": "Neurology"
+    }
+  ],
+  "reports": [
+    {
+      "id": "6899",
+      "patient": "Sonal Mehta",
+      "diagnosis": "Flu",
+      "doctorId": null
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

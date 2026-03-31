@@ -1,0 +1,29 @@
+body {
+    font-family: Arial;
+}
+
+.box {
+    border: 1px solid black;
+    padding: 10px;
+    width: 50%;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+.highlight {
+    background-color: lightyellow;
+}
+
+thead {
+    background-color: lightgray;
+}

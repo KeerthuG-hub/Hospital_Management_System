@@ -1,0 +1,5 @@
+[
+  { "id": 1, "name": "Arun", "age": 45, "disease": "Diabetes" },
+  { "id": 2, "name": "Meena", "age": 60, "disease": "Heart Problem" },
+  { "id": 3, "name": "Ravi", "age": 30, "disease": "Fever" }
+]

@@ -1,19 +1,9 @@
 $(document).ready(function () {
 
-   
-    // INITIAL DATA
-    
-    if (!localStorage.getItem("doctors")) {
-        localStorage.setItem("doctors", JSON.stringify([]));
-    }
+    const DOCTOR_URL = "http://localhost:3000/doctors";
+    const REPORT_URL = "http://localhost:3000/reports";
 
-    if (!localStorage.getItem("reports")) {
-        localStorage.setItem("reports", JSON.stringify([]));
-    }
-
-    
     // TAB SWITCHING
-   
     $("#doctorTab").click(() => {
         $("#doctorSection").show();
         $("#reportSection").hide();
@@ -23,189 +13,259 @@ $(document).ready(function () {
         $("#doctorSection").hide();
         $("#reportSection").show();
         populateDoctorDropdown();
+        loadReports();
     });
 
-    
-    // DOCTOR CRUD
-    
-
-    function getDoctors() {   // GET
-        return JSON.parse(localStorage.getItem("doctors"));
-    }
-
-    function saveDoctors(data) {
-        localStorage.setItem("doctors", JSON.stringify(data));
-    }
+    // ================= DOCTORS =================
 
     function loadDoctors() {
-        let doctors = getDoctors();
-        $("#doctorTable tbody").empty();
+        $.ajax({
+            url: DOCTOR_URL,
+            type: "GET", //GET
+            success: function (data) {
 
-        doctors.forEach(doctor => {
-            $("#doctorTable tbody").append(`
-                <tr>
-                    <td>${doctor.id}</td>
-                    <td>${doctor.name}</td>
-                    <td>${doctor.specialization}</td>
-                    <td>
-                        <button class="editDoctor editBtn" data-id="${doctor.id}">Edit</button>
-                        <button class="deleteDoctor deleteBtn" data-id="${doctor.id}">Delete</button>
-                    </td>
-                </tr>
-            `);
+                $("#doctorTable tbody").empty();
+
+                data.forEach(doctor => {
+                    $("#doctorTable tbody").append(`
+                        <tr>
+                            <td>${doctor.id}</td>
+                            <td>${doctor.name}</td>
+                            <td>${doctor.specialization}</td>
+                            <td>
+                                <button class="editDoctor editBtn" data-id="${doctor.id}">Edit</button>
+                                <button class="deleteDoctor deleteBtn" data-id="${doctor.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
         });
     }
 
     loadDoctors();
 
-    // POST & PUT
     $("#doctorForm").submit(function (e) {
         e.preventDefault();
 
-        let doctors = getDoctors();
         let id = $("#doctorId").val();
+        let name = $("#doctorName").val();
+        let specialization = $("#specialization").val();
 
         if (id) {
-            // PUT (Update)
-            doctors = doctors.map(d =>
-                d.id == id
-                    ? { ...d, name: $("#doctorName").val(), specialization: $("#specialization").val() }
-                    : d
-            );
+
+            $.ajax({
+                url: DOCTOR_URL + "/" + id,
+                type: "PUT", //PUT
+                data: JSON.stringify({
+                    id: id,
+                    name: name,
+                    specialization: specialization
+                }),
+                contentType: "application/json",
+                success: function () {
+                    loadDoctors();
+                    populateDoctorDropdown();
+                }
+            });
+
         } else {
-            // POST (Create)
-            doctors.push({
-                id: Date.now(),
-                name: $("#doctorName").val(),
-                specialization: $("#specialization").val()
+
+            $.ajax({
+                url: DOCTOR_URL,
+                type: "POST", //POST
+                data: JSON.stringify({
+                    name: name,
+                    specialization: specialization
+                }),
+                contentType: "application/json",
+                success: function () {
+                    loadDoctors();
+                    populateDoctorDropdown();
+                }
             });
         }
 
-        saveDoctors(doctors);
         this.reset();
         $("#doctorId").val("");
-        loadDoctors();
-        populateDoctorDropdown();
     });
 
-    // DELETE
-    $(document).on("click", ".deleteDoctor", function () {
-        let id = $(this).data("id");
-        let doctors = getDoctors().filter(d => d.id != id);
-        saveDoctors(doctors);
-        loadDoctors();
-        populateDoctorDropdown();
-    });
-
-    // EDIT
     $(document).on("click", ".editDoctor", function () {
-        let id = $(this).data("id");
-        let doctor = getDoctors().find(d => d.id == id);
 
-        $("#doctorId").val(doctor.id);
-        $("#doctorName").val(doctor.name);
-        $("#specialization").val(doctor.specialization);
+        let id = $(this).data("id");
+
+        $.ajax({
+            url: DOCTOR_URL + "/" + id,
+            type: "GET", //GET single
+            success: function (doctor) {
+                $("#doctorId").val(doctor.id);
+                $("#doctorName").val(doctor.name);
+                $("#specialization").val(doctor.specialization);
+            }
+        });
     });
 
-    
-    // REPORT CRUD
-   
+    $(document).on("click", ".deleteDoctor", function () {
 
-    function getReports() {   // GET
-        return JSON.parse(localStorage.getItem("reports"));
-    }
+        let id = $(this).data("id");
 
-    function saveReports(data) {
-        localStorage.setItem("reports", JSON.stringify(data));
-    }
+        $.ajax({
+            url: DOCTOR_URL + "/" + id,
+            type: "DELETE", //DELETE
+            success: function () {
+                loadDoctors();
+                populateDoctorDropdown();
+            }
+        });
+    });
+
+    // PATCH example (double click edit button)
+    $(document).on("dblclick", ".editDoctor", function () {
+
+        let id = $(this).data("id");
+        let newName = prompt("New Name");
+
+        if (newName) {
+            $.ajax({
+                url: DOCTOR_URL + "/" + id,
+                type: "PATCH", //PATCH
+                data: JSON.stringify({ name: newName }),
+                contentType: "application/json",
+                success: function () {
+                    loadDoctors();
+                }
+            });
+        }
+    });
 
     function populateDoctorDropdown() {
-        let doctors = getDoctors();
-        $("#assignedDoctor").empty().append(`<option value="">Select Doctor</option>`);
+        $.ajax({
+            url: DOCTOR_URL,
+            type: "GET", //GET
+            success: function (data) {
 
-        doctors.forEach(d => {
-            $("#assignedDoctor").append(`<option value="${d.id}">${d.name}</option>`);
+                $("#assignedDoctor").empty().append(`<option value="">Select Doctor</option>`);
+
+                data.forEach(d => {
+                    $("#assignedDoctor").append(
+                        `<option value="${d.id}">${d.name}</option>`
+                    );
+                });
+            }
         });
     }
+
+    // ================= REPORTS =================
 
     function loadReports() {
-        let reports = getReports();
-        let doctors = getDoctors();
+        $.ajax({
+            url: REPORT_URL,
+            type: "GET", //GET
+            success: function (reports) {
 
-        $("#reportTable tbody").empty();
+                $.ajax({
+                    url: DOCTOR_URL,
+                    type: "GET", //GET doctors
+                    success: function (doctors) {
 
-        reports.forEach(report => {
-            let doctor = doctors.find(d => d.id == report.doctorId);
+                        $("#reportTable tbody").empty();
 
-            $("#reportTable tbody").append(`
-                <tr>
-                    <td>${report.id}</td>
-                    <td>${report.patient}</td>
-                    <td>${report.diagnosis}</td>
-                    <td>${doctor ? doctor.name : "Not Assigned"}</td>
-                    <td>
-                        <button class="editReport editBtn" data-id="${report.id}">Edit</button>
-                        <button class="deleteReport deleteBtn" data-id="${report.id}">Delete</button>
-                    </td>
-                </tr>
-            `);
+                        reports.forEach(report => {
+
+                            let doctor = doctors.find(d => d.id == report.doctorId);
+
+                            $("#reportTable tbody").append(`
+                                <tr>
+                                    <td>${report.id}</td>
+                                    <td>${report.patient}</td>
+                                    <td>${report.diagnosis}</td>
+                                    <td>${doctor ? doctor.name : "Not Assigned"}</td>
+                                    <td>
+                                        <button class="editReport editBtn" data-id="${report.id}">Edit</button>
+                                        <button class="deleteReport deleteBtn" data-id="${report.id}">Delete</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    }
+                });
+            }
         });
     }
 
-    loadReports();
-
-    // POST & PUT
     $("#reportForm").submit(function (e) {
         e.preventDefault();
 
-        let reports = getReports();
         let id = $("#reportId").val();
+        let patient = $("#patientName").val();
+        let diagnosis = $("#diagnosis").val();
+        let doctorId = parseInt($("#assignedDoctor").val());
 
         if (id) {
-            // PUT
-            reports = reports.map(r =>
-                r.id == id
-                    ? {
-                        ...r,
-                        patient: $("#patientName").val(),
-                        diagnosis: $("#diagnosis").val(),
-                        doctorId: parseInt($("#assignedDoctor").val())
-                    }
-                    : r
-            );
+
+            $.ajax({
+                url: REPORT_URL + "/" + id,
+                type: "PUT", //PUT
+                data: JSON.stringify({
+                    id: id,
+                    patient: patient,
+                    diagnosis: diagnosis,
+                    doctorId: doctorId
+                }),
+                contentType: "application/json",
+                success: function () {
+                    loadReports();
+                }
+            });
+
         } else {
-            // POST
-            reports.push({
-                id: Date.now(),
-                patient: $("#patientName").val(),
-                diagnosis: $("#diagnosis").val(),
-                doctorId: parseInt($("#assignedDoctor").val())
+
+            $.ajax({
+                url: REPORT_URL,
+                type: "POST", //POST
+                data: JSON.stringify({
+                    patient: patient,
+                    diagnosis: diagnosis,
+                    doctorId: doctorId
+                }),
+                contentType: "application/json",
+                success: function () {
+                    loadReports();
+                }
             });
         }
 
-        saveReports(reports);
         this.reset();
         $("#reportId").val("");
-        loadReports();
     });
 
-    // DELETE
-    $(document).on("click", ".deleteReport", function () {
-        let id = $(this).data("id");
-        let reports = getReports().filter(r => r.id != id);
-        saveReports(reports);
-        loadReports();
-    });
-
-    // EDIT
     $(document).on("click", ".editReport", function () {
-        let id = $(this).data("id");
-        let report = getReports().find(r => r.id == id);
 
-        $("#reportId").val(report.id);
-        $("#patientName").val(report.patient);
-        $("#diagnosis").val(report.diagnosis);
-        $("#assignedDoctor").val(report.doctorId);
+        let id = $(this).data("id");
+
+        $.ajax({
+            url: REPORT_URL + "/" + id,
+            type: "GET", //GET single
+            success: function (report) {
+                $("#reportId").val(report.id);
+                $("#patientName").val(report.patient);
+                $("#diagnosis").val(report.diagnosis);
+                $("#assignedDoctor").val(report.doctorId);
+            }
+        });
+    });
+
+    $(document).on("click", ".deleteReport", function () {
+
+        let id = $(this).data("id");
+
+        $.ajax({
+            url: REPORT_URL + "/" + id,
+            type: "DELETE", //DELETE
+            success: function () {
+                loadReports();
+            }
+        });
     });
 
 });
